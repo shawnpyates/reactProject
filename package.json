@@ -1,14 +1,14 @@
 {
-  "name": "react-simple-boilerplate",
+  "name": "react-project",
   "version": "1.0.0",
-  "description": "Simple and lightweight Boilerplate for ReactJS projects",
+  "description": "ReactJS Project",
   "scripts": {
     "lint": "eslint src",
     "start": "node server.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/noahlotzer/react-simple-boilerplate.git"
+    "url": "https://github.com/shawnpyates/reactProject"
   },
   "keywords": [
     "react",
