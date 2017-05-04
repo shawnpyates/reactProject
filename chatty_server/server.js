@@ -31,13 +31,22 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
   ws.on('message', (message) => {
     const parsedMessage = JSON.parse(message);
-    parsedMessage.id = uuidV4();
-    const id = parsedMessage.id;
-    const username = parsedMessage.username;
-    const content = parsedMessage.content;
-    console.log(`User ${username} sent a message with the id ${id}. It said "${content}."`);
+    // logic here
+    if (parsedMessage.type === "postMessage") {
+      parsedMessage.id = uuidV4();
+      parsedMessage.type = "incomingMessage";
+      let id = parsedMessage.id;
+      let username = parsedMessage.username;
+      let content = parsedMessage.content;
+      console.log(`User ${username} sent a message with the id ${id}. It said "${content}."`);
+    } else if (parsedMessage.type === "postNotification") {
+      parsedMessage.id = uuidV4();
+      parsedMessage.type = "incomingNotification";
+      let id = parsedMessage.id;
+      let username = parsedMessage.username;
+      console.log(`Notification with id ${id} sent for the user now known as ${username}.`);
+    }
     const stringifiedMessage = JSON.stringify(parsedMessage);
-
     wss.clients.forEach(function each (client) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(stringifiedMessage);

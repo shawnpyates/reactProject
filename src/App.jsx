@@ -15,22 +15,12 @@ class App extends Component {
       }
   }
 
-  // componentDidMount() {
-  //   console.log("componentDidMount <App />");
-  //   setTimeout(() => {
-  //     console.log("Simulating incoming message");
-  //     // Add a new message to the list of messages in the data store
-  //     const newMessage = {id: 3, username: "Michelle", content: "Hello there!"};
-  //     const messages = this.state.messages.concat(newMessage)
-  //     // Update the state of the app component.
-  //     // Calling setState will trigger a call to render() in App and all child components.
-  //     this.setState({messages: messages})
-  //   }, 3000);
-  // }
 
   onNewMessage(event) {
     // const id = this.state.messages.length + 1;
-    const newMessage = {username: this.state.currentUser.name, content: event.target.value};
+    const newMessage = {type: "postMessage",
+                        username: this.state.currentUser.name,
+                        content: event.target.value};
     // const newMessage = {id: id, username: this.state.currentUser.name, content: event.target.value};
     // const messages = this.state.messages.concat(newMessage);
     // this.setState({messages: messages});
@@ -42,7 +32,13 @@ class App extends Component {
 
 
   onUserChange(event) {
-    this.setState({currentUser: {name: event.target.value}});
+    const oldUsername = this.state.currentUser.name;
+    const newUsername = event.target.value;
+    const newNotification = {type: "postNotification",
+                             username: newUsername,
+                             content: `${oldUsername} has changed their name to ${newUsername}.`};
+    this.socket.send(JSON.stringify(newNotification));
+    // this.setState({currentUser: {name: event.target.value}});
   }
 
 
@@ -55,6 +51,12 @@ class App extends Component {
         </nav>
         <MessageList messages={this.state.messages} />
         <ChatBar currentUser={this.state.currentUser}
+                 // we need to bind here, because otherwise 'this' will refer to the
+                 // component in which its being called
+                 // in other words, if onNewMessage gets passed to Chatbar without being
+                 // bound, when it's called, it'll be like "i'm in chatbar, so *this* refers
+                 // to chatbar... but chatbar has no state called 'currentUser, so wtf are you
+                 // talking about?"
                  onNewMessage={this.onNewMessage.bind(this)}
                  onUserChange={this.onUserChange.bind(this)} />
       </div>
@@ -67,9 +69,20 @@ class App extends Component {
       console.log("Connected to server.");
     }
     this.socket.onmessage = event => {
-      const incomingMessage = JSON.parse(event.data);
-      let totalMessages = this.state.messages.concat(incomingMessage);
-      this.setState({messages: totalMessages });
+      const incomingData = JSON.parse(event.data);
+      switch (incomingData.type) {
+        case "incomingMessage":
+          let totalMessages = this.state.messages.concat(incomingData);
+          this.setState({messages: totalMessages });
+          break;
+        case "incomingNotification":
+          let totalMessages2 = this.state.messages.concat(incomingData);
+          this.setState({messages: totalMessages2});
+          this.setState({currentUser: {name: incomingData.username }});
+          break;
+        default:
+          throw new Error("Unknown event type " + incomingData.type);
+      }
     }
   }
 
