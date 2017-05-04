@@ -11,18 +11,7 @@ class App extends Component {
       {
         // optional. if currentUser is not defined, it means the user is Anonymous
         currentUser: {name: "Bob"},
-        messages: [
-          {
-            id: 1,
-            username: "Bob",
-            content: "Has anyone seen my marbles?",
-          },
-          {
-            id: 2,
-            username: "Anonymous",
-            content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-          }
-        ]
+        messages: []
       }
   }
 
@@ -40,11 +29,17 @@ class App extends Component {
   // }
 
   onNewMessage(event) {
-    const id = this.state.messages.length + 1;
-    const newMessage = {id: id, username: this.state.currentUser.name, content: event.target.value};
-    const messages = this.state.messages.concat(newMessage);
-    this.setState({messages: messages});
+    // const id = this.state.messages.length + 1;
+    const newMessage = {username: this.state.currentUser.name, content: event.target.value};
+    // const newMessage = {id: id, username: this.state.currentUser.name, content: event.target.value};
+    // const messages = this.state.messages.concat(newMessage);
+    // this.setState({messages: messages});
+    this.socket.send(JSON.stringify(newMessage));
+    event.target.value = "";
   }
+
+
+
 
   onUserChange(event) {
     this.setState({currentUser: {name: event.target.value}});
@@ -67,9 +62,14 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.socket = new Websocket("ws://0.0.0.0:3001");
-    this.socket.onopen = event => {
+    this.socket = new WebSocket("ws://0.0.0.0:3001");
+    this.socket.onopen = () => {
       console.log("Connected to server.");
+    }
+    this.socket.onmessage = event => {
+      const incomingMessage = JSON.parse(event.data);
+      let totalMessages = this.state.messages.concat(incomingMessage);
+      this.setState({messages: totalMessages });
     }
   }
 
@@ -80,3 +80,31 @@ export default App;
 
 // import subcomponents here!!
     //elements from other components here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

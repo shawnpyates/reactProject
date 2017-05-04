@@ -14,7 +14,7 @@ class Chatbar extends Component {
 
   handleKeyPressUser(event) {
     if (event.key === "Enter") {
-       this.props.onUserChange(event);
+    this.props.onUserChange(event);
     }
   }
 
