@@ -11,19 +11,19 @@ class App extends Component {
       {
         // optional. if currentUser is not defined, it means the user is Anonymous
         connectionCount: 0,
-        currentUser: {name: "Anonymous"},
+        currentUser: {name: "Anonymous",
+                      color: ""
+                     },
         messages: []
       }
   }
-
-
-
 
   onNewMessage(event) {
     // const id = this.state.messages.length + 1;
     const newMessage = {type: "postMessage",
                         username: this.state.currentUser.name,
-                        content: event.target.value};
+                        content: event.target.value,
+                        color: this.state.currentUser.color};
     // const newMessage = {id: id, username: this.state.currentUser.name, content: event.target.value};
     // const messages = this.state.messages.concat(newMessage);
     // this.setState({messages: messages});
@@ -37,14 +37,14 @@ class App extends Component {
     const newUsername = event.target.value;
     const newNotification = {type: "postNotification",
                              username: newUsername,
-                             content: `${oldUsername} has changed their name to ${newUsername}.`};
+                             content: `${oldUsername} has changed their name to ${newUsername}.`,
+                             color: this.state.currentUser.color};
     this.socket.send(JSON.stringify(newNotification));
     // this.setState({currentUser: {name: event.target.value}});
   }
 
 
   render() {
-    console.log("Rendering <App/>");
     return (
       <div>
         <nav className="navbar">
@@ -69,11 +69,17 @@ class App extends Component {
     this.socket = new WebSocket("ws://0.0.0.0:3001");
     this.socket.onopen = event => {
       console.log("HELLO FROM THIS.SOCKET.ONOPEN");
-
     }
     this.socket.onmessage = event => {
       const incomingData = JSON.parse(event.data);
+      console.log("INCOMING DATA HERE: " + incomingData);
       switch (incomingData.type) {
+        case "setColor":
+          this.setState({currentUser: {
+              name: this.state.currentUser.name,
+              color: incomingData.color
+            }
+          });
         case "incomingMessage":
           let totalMessages = this.state.messages.concat(incomingData);
           this.setState({messages: totalMessages });
@@ -81,7 +87,8 @@ class App extends Component {
         case "incomingNotification":
           let totalMessages2 = this.state.messages.concat(incomingData);
           this.setState({messages: totalMessages2});
-          this.setState({currentUser: {name: incomingData.username }});
+          this.setState({currentUser: {name: incomingData.username,
+                                       color: incomingData.color}});
           break;
         case "connectionCountChange":
           this.setState({connectionCount: incomingData.content});

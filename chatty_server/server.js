@@ -7,6 +7,11 @@ const WebSocket = require('ws');
 // Set the port to 3001
 const PORT = 3001;
 
+const colors = ['blue', 'red', 'green', 'purple'];
+
+function getRandomColor(arr) {
+  return arr[Math.floor(Math.random() * 3 + 1)];
+}
 // Create a new express server
 const server = express()
    // Make the express server serve static assets (html, javascript, css) from the /public folder
@@ -30,6 +35,7 @@ wss.broadcast = function broadcast(data){
 // the ws parameter in the callback.
 
 wss.on('connection', (ws) => {
+  ws.send(JSON.stringify({type: "setColor", color: getRandomColor(colors)}));
   wss.broadcast({
     type: "connectionCountChange",
     content: wss.clients.size
@@ -45,7 +51,7 @@ wss.on('connection', (ws) => {
       let username = parsedMessage.username;
       let content = parsedMessage.content;
       let color = parsedMessage.color;
-      console.log(`User ${username} with color ${color} sent a message with the id ${id}. It said "${content}."`);
+      console.log(`User ${username} with color of ${color} sent a message with the id ${id}. It said "${content}."`);
     } else if (parsedMessage.type === "postNotification") {
       parsedMessage.id = uuidV4();
       parsedMessage.type = "incomingNotification";
