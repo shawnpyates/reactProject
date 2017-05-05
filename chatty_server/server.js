@@ -16,18 +16,24 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
-// wss.broadcast = function broadcast(data){
-//   wss.clients.forEach(function each(client) {
-//     if (client.readyState === WebSocket.OPEN) {
-//       client.send(data);
-//     }
-//   });
-// }
+wss.broadcast = function broadcast(data){
+  wss.clients.forEach(function each(client) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
+
 
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
+
 wss.on('connection', (ws) => {
+  wss.broadcast({
+    type: "connectionCountChange",
+    content: wss.clients.size
+  });
   console.log('Client connected');
   ws.on('message', (message) => {
     const parsedMessage = JSON.parse(message);
@@ -38,7 +44,8 @@ wss.on('connection', (ws) => {
       let id = parsedMessage.id;
       let username = parsedMessage.username;
       let content = parsedMessage.content;
-      console.log(`User ${username} sent a message with the id ${id}. It said "${content}."`);
+      let color = parsedMessage.color;
+      console.log(`User ${username} with color ${color} sent a message with the id ${id}. It said "${content}."`);
     } else if (parsedMessage.type === "postNotification") {
       parsedMessage.id = uuidV4();
       parsedMessage.type = "incomingNotification";
@@ -46,14 +53,15 @@ wss.on('connection', (ws) => {
       let username = parsedMessage.username;
       console.log(`Notification with id ${id} sent for the user now known as ${username}.`);
     }
-    const stringifiedMessage = JSON.stringify(parsedMessage);
-    wss.clients.forEach(function each (client) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(stringifiedMessage);
-      }
-    });
+    wss.broadcast(parsedMessage);
   });
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    wss.broadcast({
+      type: "connectionCountChange",
+      content: wss.clients.size
+    });
+    console.log("Connection closed.");
+  });
 });
 

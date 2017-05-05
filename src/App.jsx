@@ -10,10 +10,13 @@ class App extends Component {
     this.state =
       {
         // optional. if currentUser is not defined, it means the user is Anonymous
-        currentUser: {name: "Bob"},
+        connectionCount: 0,
+        currentUser: {name: "Anonymous"},
         messages: []
       }
   }
+
+
 
 
   onNewMessage(event) {
@@ -27,8 +30,6 @@ class App extends Component {
     this.socket.send(JSON.stringify(newMessage));
     event.target.value = "";
   }
-
-
 
 
   onUserChange(event) {
@@ -48,6 +49,7 @@ class App extends Component {
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
+          <div className="connection-count">{this.state.connectionCount} user(s) online</div>
         </nav>
         <MessageList messages={this.state.messages} />
         <ChatBar currentUser={this.state.currentUser}
@@ -65,8 +67,9 @@ class App extends Component {
 
   componentDidMount() {
     this.socket = new WebSocket("ws://0.0.0.0:3001");
-    this.socket.onopen = () => {
-      console.log("Connected to server.");
+    this.socket.onopen = event => {
+      console.log("HELLO FROM THIS.SOCKET.ONOPEN");
+
     }
     this.socket.onmessage = event => {
       const incomingData = JSON.parse(event.data);
@@ -80,6 +83,8 @@ class App extends Component {
           this.setState({messages: totalMessages2});
           this.setState({currentUser: {name: incomingData.username }});
           break;
+        case "connectionCountChange":
+          this.setState({connectionCount: incomingData.content});
         default:
           throw new Error("Unknown event type " + incomingData.type);
       }

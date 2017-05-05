@@ -12,7 +12,7 @@ class MessageList extends Component {
     console.log("IN MESSAGE LIST");
     let messagesRendered = messages.map((message) => {
       return (
-        <Message username={message.username} content={message.content} key={message.id} />
+        <Message type={message.type} username={message.username} content={message.content} key={message.id} />
       );
     });
     return (
