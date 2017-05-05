@@ -8,8 +8,7 @@ class Message extends Component {
 
 
   render() {
-    console.log("Rendering <Message/>");
-    if (this.props.type === "incomingMessage") {
+    if (this.props.type === 'incomingMessage') {
       return (
         <div className="message" id={this.props.id}>
           <span className="message-username"><font color={this.props.color}> {this.props.username} </font></span>

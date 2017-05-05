@@ -7,6 +7,7 @@ const WebSocket = require('ws');
 // Set the port to 3001
 const PORT = 3001;
 
+// assign each user a color out of this array randomly
 const colors = ['blue', 'red', 'green', 'purple'];
 
 function getRandomColor(arr) {
@@ -21,6 +22,7 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
+// broadcast data to all clients
 wss.broadcast = function broadcast(data){
   wss.clients.forEach(function each(client) {
     if (client.readyState === WebSocket.OPEN) {
