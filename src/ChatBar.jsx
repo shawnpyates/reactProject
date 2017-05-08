@@ -3,6 +3,10 @@
 import React, { Component } from 'react';
 
 class Chatbar extends Component {
+  
+  constructor(props) {
+    super(props);
+  }
 
   // chat messages submitted upon hitting 'enter' key
   handleKeyPressMessage(event) {
@@ -10,7 +14,6 @@ class Chatbar extends Component {
        this.props.onNewMessage(event);
     }
   }
-
 
   // send notification if user leaves the text field and name has been changed
   handleKeyPressUser(event) {
