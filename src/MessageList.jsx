@@ -1,21 +1,24 @@
-
-
 // Render the top-level React component
 import React, { Component } from 'react';
 
 import Message from './Message.jsx';
 
 class MessageList extends Component {
+  
+  constructor(props) {
+    super(props);
+  }
 
   render() {
     let messages = this.props.messages;
     let messagesRendered = messages.map((message) => {
       return (
-        <Message type={message.type} color={message.color} username={message.username} content={message.content} key={message.id} />
+        <Message type={message.type} color={message.color} 
+         username={message.username} content={message.content} key={message.id} />
       );
     });
     return (
-<main className="messages"> {messagesRendered} </main>)
+      <main className="messages"> {messagesRendered} </main>)
   }
 }
 
